@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MGroup.MachineLearning.Preprocessing
 {
-	/// <summary>
-	/// Normalize the data using the
-	/// Z-score normalization so that
-	/// their values have zero mean and unit variance.
-	/// </summary>
+    /// <summary>
+    /// Normalize the data using the
+    /// Z-score normalization so that
+    /// their values have zero mean and unit variance.
+    /// </summary>
+    [Serializable]
 	public class ZScoreNormalization : INormalization
 	{
 		public double[] MeanValuePerDirection { get; private set; }

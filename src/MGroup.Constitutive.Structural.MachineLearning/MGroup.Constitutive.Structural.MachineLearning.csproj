@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MGroup.MachineLearning.TensorFlow\MGroup.MachineLearning.TensorFlow.csproj" />
     <ProjectReference Include="..\MGroup.MachineLearning\MGroup.MachineLearning.csproj" />
   </ItemGroup>
 

@@ -10,4 +10,11 @@
     <PackageIconUrl>https://github.com/mgroupntua/MachineLearning/raw/develop/MGroupMachineLearning.png</PackageIconUrl>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Convolution2DLayerParameter.cs" />
+    <Compile Remove="DenseLayerParameter.cs" />
+    <Compile Remove="INetworkLayerParameter.cs" />
+    <Compile Remove="INeuralNetwork.cs" />
+  </ItemGroup>
+
 </Project>

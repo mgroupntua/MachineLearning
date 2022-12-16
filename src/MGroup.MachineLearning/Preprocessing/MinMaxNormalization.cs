@@ -2,12 +2,13 @@ using System;
 
 namespace MGroup.MachineLearning.Preprocessing
 {
-	/// <summary>
-	/// Normalize the data using the
-	/// MinMax normalization so that
-	/// their values lie in
-	/// the [0,1] domain.
-	/// </summary>
+    /// <summary>
+    /// Normalize the data using the
+    /// MinMax normalization so that
+    /// their values lie in
+    /// the [0,1] domain.
+    /// </summary>
+    [Serializable]
 	public class MinMaxNormalization : INormalization
 	{
 		public double[] MinValuePerDirection { get; private set; }
