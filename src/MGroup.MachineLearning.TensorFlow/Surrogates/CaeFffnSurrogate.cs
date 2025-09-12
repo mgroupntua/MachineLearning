@@ -20,6 +20,10 @@ namespace MGroup.MachineLearning.TensorFlow
 	using Tensorflow.Keras.Losses;
 	using Tensorflow.Operations.Initializers;
 
+	/// <summary>
+	/// Machine learning surrogate that uses convolutional autoencoders to compress ouputs to a latent space and then a 
+	/// feed-forward neural network to map inputs to the latent space.
+	/// </summary>
 	public class CaeFffnSurrogate : ISurrogateModel2DTo2D
 	{
 		private const TF_DataType DataType = TF_DataType.TF_DOUBLE;
@@ -54,8 +58,39 @@ namespace MGroup.MachineLearning.TensorFlow
 		//Delete
 		private ConvolutionalNeuralNetwork _encoder;
 
+		/// <summary>
+		/// <inheritdoc/>
+		/// </summary>
 		public IReadOnlyList<string> ErrorNames => new string[] { "CAE error", "Surrogate error" };
 
+		/// <summary>
+		/// Creates a new instance of <see cref="CaeFffnSurrogate"/> with the specified settings
+		/// </summary>
+		/// <param name="caeBatchSize">The batch size when training the CAE.</param>
+		/// <param name="caeNumEpochs">The number of epochs when training the CAE.</param>
+		/// <param name="caeLearningRate">The learning rate when training the CAE.</param>
+		/// <param name="caeKernelSize">The size of the 1D convulution kernel.</param>
+		/// <param name="caeStrides">The strides for the convolutional kernel.</param>
+		/// <param name="caePadding">The padding for the convolutional kernel.</param>
+		/// <param name="decoderFiltersWithoutOutput">Size of each decoder layer of the CAE, except the ouput layer.</param>
+		/// <param name="encoderFilters">Size of each encoder layer of the CAE, except the input layer</param>
+		/// <param name="ffnnBatchSize">The batch size when training the FFNN.</param>
+		/// <param name="ffnnNumEpochs">The number of epochs when training the FFNN.</param>
+		/// <param name="ffnnNumHiddenLayers">The number of FFNN layers, except input and output.</param>
+		/// <param name="ffnnHiddenLayerSize">The size of each FFNN layer, except input and output.</param>
+		/// <param name="ffnnLearningRate">The learning rate when training the FFNN.</param>
+		/// <param name="latentSpaceDim">
+		/// The size of the latent space of the surrogate. It is equal to the output size of the FFNN and the input size of 
+		/// the decoder.
+		/// </param>
+		/// <param name="splitter">
+		/// Determines how to split the input/output datasets into training, test and evaluation sets.
+		/// </param>
+		/// <param name="tfSeed">A seed value for TensorFlow.Net, in order to reproduce runs.</param>
+		/// <param name="initOutputStream">
+		/// Output stream where logs collected during training and testing will be written to.
+		/// </param>
+		/// <exception cref="ArgumentException">Thrown if some of the settings are not compatible.</exception>
 		public CaeFffnSurrogate(int caeBatchSize, int caeNumEpochs, float caeLearningRate, int caeKernelSize, int caeStrides,
 			ConvolutionPaddingType caePadding, int[] decoderFiltersWithoutOutput, int[] encoderFilters,
 			int ffnnBatchSize, int ffnnNumEpochs, int ffnnNumHiddenLayers, int ffnnHiddenLayerSize, float ffnnLearningRate,
@@ -89,6 +124,11 @@ namespace MGroup.MachineLearning.TensorFlow
 			_initOutputStream = initOutputStream;
 		}
 
+		/// <summary>
+		/// Predicts the response of the original model for the provided parameter values. 
+		/// </summary>
+		/// <param name="input">1D array with parameter values of the original model.</param>
+		/// <returns>The predicted response as an 1D array.</returns>
 		public double[] Predict(double[] input)
 		{
 			double[,] ffnnInput = input.AddEmptyDimensions(true, false);
@@ -98,6 +138,14 @@ namespace MGroup.MachineLearning.TensorFlow
 			return output;
 		}
 
+		/// <summary>
+		/// <inheritdoc/>
+		/// </summary>
+		/// <param name="inputDataset"><inheritdoc/></param>
+		/// <param name="outputDataset"><inheritdoc/></param>
+		/// <param name="splitter"><inheritdoc/></param>
+		/// <returns><inheritdoc/></returns>
+		/// <exception cref="ArgumentException"><inheritdoc/></exception>
 		public Dictionary<string, double> TrainAndEvaluate(double[,] inputDataset, double[,] outputDataset, 
 			DatasetSplitter? splitter)
 		{
@@ -278,8 +326,14 @@ namespace MGroup.MachineLearning.TensorFlow
 			return error;
 		}
 
+		/// <summary>
+		/// Helper class to facilitate the creation of <see cref="CaeFffnSurrogate"/>
+		/// </summary>
 		public class Builder
 		{
+			/// <summary>
+			/// Creates a new instance of <see cref="Builder"/> with default settings.
+			/// </summary>
 			public Builder()
 			{
 				//GetOutputStream = () =>
@@ -297,44 +351,97 @@ namespace MGroup.MachineLearning.TensorFlow
 				Splitter.SetOrderToContiguous(DataSubsetType.Training, DataSubsetType.Test);
 			}
 
+			/// <summary>
+			/// The batch size when training the CAE.
+			/// </summary>
 			public int CaeBatchSize { get; set; } = 10;
 
+			/// <summary>
+			/// The number of epochs when training the CAE.
+			/// </summary>
 			public int CaeNumEpochs { get; set; } = 40;
 
+			/// <summary>
+			/// The learning rate when training the CAE.
+			/// </summary>
 			public float CaeLearningRate { get; set; } = 5E-4f;
 
+			/// <summary>
+			/// The size of the 1D convulution kernel.
+			/// </summary>
 			public int CaeKernelSize { get; set; } = 5;
 
+			/// <summary>
+			/// The strides for the convolutional kernel.
+			/// </summary>
 			public int CaeStrides { get; set; } = 1;
 
+			/// <summary>
+			/// The padding for the convolutional kernel.
+			/// </summary>
 			public ConvolutionPaddingType CaePadding { get; set; } = ConvolutionPaddingType.Same;
 
 			/// <summary>
-			/// Another convolutional layer (with linear activation) from the last hidden layer to the output space will be 
-			/// automatically added to the end.
+			/// Size of each decoder layer of the CAE, except the ouput layer. Another convolutional layer (with linear 
+			/// activation) from the last hidden layer to the output space will be automatically added to the end.
 			/// </summary>
 			public int[] DecoderFiltersWithoutOutput { get; set; } = { 32, 64, 128 };
 
+			/// <summary>
+			/// Size of each encoder layer of the CAE, except the input layer.
+			/// </summary>
 			public int[] EncoderFilters { get; set; } = { 128, 64, 32, 16 };
 
+			/// <summary>
+			/// The batch size when training the FFNN.
+			/// </summary>
 			public int FfnnBatchSize { get; set; } = 20;
 
+			/// <summary>
+			/// The number of epochs when training the FFNN.
+			/// </summary>
 			public int FfnnNumEpochs { get; set; } = 3000;
 
+			/// <summary>
+			/// The number of FFNN layers, except input and output.
+			/// </summary>
 			public int FfnnNumHiddenLayers { get; set; } = 6;
 
+			/// <summary>
+			/// The size of each FFNN layer, except input and output.
+			/// </summary>
 			public int FfnnHiddenLayerSize { get; set; } = 64;
 
+			/// <summary>
+			/// The learning rate when training the FFNN.
+			/// </summary>
 			public float FfnnLearningRate { get; set; } = 1E-4f;
 
+			/// <summary>
+			/// Function that provides the output stream where logs collected during training and testing will be written to.
+			/// </summary>
 			public Func<StreamWriter> GetOutputStream { get; set; }
 
+			/// <summary>
+			/// The size of the latent space of the surrogate. It is equal to the output size of the FFNN and the input size of 
+			/// the decoder.
+			/// </summary>
 			public int LatentSpaceDim { get; set; } = 8;
 
+			/// <summary>
+			/// Determines how to split the input/output datasets into training, test and evaluation sets.
+			/// </summary>
 			public DatasetSplitter Splitter { get; set; }
 
+			/// <summary>
+			/// A seed value for TensorFlow.Net, in order to reproduce runs.
+			/// </summary>
 			public int? TensorFlowSeed { get; set; } = null;
 
+			/// <summary>
+			/// Creates a new instance of <see cref="CaeFffnSurrogate"/> based on the properties of this object.
+			/// </summary>
+			/// <returns>A new instance of <see cref="CaeFffnSurrogate"/></returns>
 			public CaeFffnSurrogate BuildSurrogate()
 			{
 				return new CaeFffnSurrogate(CaeBatchSize, CaeNumEpochs, CaeLearningRate, CaeKernelSize, CaeStrides, CaePadding, 
