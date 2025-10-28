@@ -1,4 +1,5 @@
 using MGroup.Constitutive.Structural.Continuum;
+using MGroup.LinearAlgebra.Extensions;
 using MGroup.LinearAlgebra.Matrices;
 using MGroup.MachineLearning;
 using MGroup.MSolve.Constitutive;
