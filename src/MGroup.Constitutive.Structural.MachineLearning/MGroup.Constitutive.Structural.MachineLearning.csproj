@@ -12,14 +12,24 @@
     <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
   </PropertyGroup>
 
+  <!-- Import the global props file for development on local machines-->
+  <Import Project="..\..\..\Directory.Build.props" Condition="Exists('..\..\..\Directory.Build.props')" />
+  <PropertyGroup>
+    <UseLocalMSolveProjects Condition="'$(UseLocalMSolveProjects)' == ''">false</UseLocalMSolveProjects>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Remove="Preprocessing\**" />
     <EmbeddedResource Remove="Preprocessing\**" />
     <None Remove="Preprocessing\**" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseLocalMSolveProjects)' == 'false'">
     <PackageReference Include="MGroup.Constitutive.Structural" Version="0.2.0-unstable.77" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseLocalMSolveProjects)' == 'true'">
+    <ProjectReference Include="..\..\..\Constitutive\src\MGroup.Constitutive.Structural\MGroup.Constitutive.Structural.csproj" />
   </ItemGroup>
 
   <ItemGroup>
