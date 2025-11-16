@@ -114,7 +114,7 @@ namespace MGroup.Constitutive.Structural.MachineLearning
 
 		public double[] Stresses => stressesNew;
 
-		public IMatrixView ConstitutiveMatrix
+		public IReadOnlyMatrix ConstitutiveMatrix
 		{
 			get
 			{
