@@ -324,14 +324,14 @@ namespace MGroup.MachineLearning.TensorFlow.NeuralNetworks
 
 		public void LoadNetwork(string netPath, string weightsPath, string normalizationPath)
 		{
-			using (Stream stream = File.Open(normalizationPath, FileMode.Open))
+			using (Stream stream = File.Open(normalizationPath, FileMode.Open, FileAccess.Read, FileShare.Read))
 			{
 				var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
 				var normalization = (INormalization[])binaryFormatter.Deserialize(stream);
 				Normalization = normalization[0];
 			}
 
-			using (Stream stream = File.Open(netPath, FileMode.Open))
+			using (Stream stream = File.Open(netPath, FileMode.Open, FileAccess.Read, FileShare.Read))
 			{
 				var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
 				AutoencoderLayer = (INetworkLayer[])binaryFormatter.Deserialize(stream);
